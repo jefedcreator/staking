@@ -50,8 +50,8 @@ async function main() {
   
 
  //stake 10 tokens
-//  await stakeboredapetokenInteract.connect(signer).stake(10);
-//  console.log("stake succesful");
+await stakeboredapetokenInteract.connect(signer).stake(10);
+console.log("stake succesful");
 
  //withdraw from contract
  await stakeboredapetokenInteract.connect(signer).withdraw(10);
