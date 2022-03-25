@@ -2,20 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IERC721{
-    function balanceOf(address _owner) external view returns (uint256);
-}
-
-contract boredApeToken is ERC20, Ownable{
+contract boredApeToken is ERC20{
     constructor() ERC20("boredApeToken", "brt") {
-        _mint(msg.sender, 10*10**18);
+        _mint(address(this), 1000000*10**18);
+        approve(address(this), 100000 * 10**18);
     }
 
-    // function mintToken(uint256 amount) public onlyOwner {
-    //     // _mint(msg.sender, amount*decimal);
-    // }
-
-    
+    function transferBoredApeToken(address _to, uint amount) public{
+        _transfer(address(this),_to,amount * 10**18);
+    }
 }

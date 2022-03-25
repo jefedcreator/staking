@@ -1,46 +1,63 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./IERC721.sol";
+import "./IERC20.sol";
 
-interface IERC721{
-    function balanceOf(address _owner) external view returns (uint256);
-}
+contract stakeboredToken{
 
-contract boredToken is ERC20, Ownable{
-
-    address boredApe = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
-
-    constructor() ERC20("boredApeToken", "brt") {
-        
+    struct staker{
+        uint stakeAmount;
+        uint balance;
+        uint reward;
+        address skater;
+        uint stakeTime;
     }
 
-    // function mintToken(uint256 amount) public onlyOwner {
-    //     // _mint(msg.sender, amount*decimal);
-    // }
+    mapping(address => staker) stakers;
 
-    function checkBal(address _eoa ) public view returns(bool status){
-        return status = (IERC721(boredApe).balanceOf(_eoa) > 0);
+    IERC721 boredApe = IERC721(0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D);
+    IERC20 boredToken = IERC20(0x4bf010f1b9beDA5450a8dD702ED602A104ff65EE);
+
+    function receiveToken() public{
+        require(boredApe.balanceOf(msg.sender) > 0, "You need to own a bored ape");
+        boredToken.transfer(msg.sender, 100);
     }
 
-    function mint() public {
-        require(checkBal(msg.sender), "this address does not own a BAYC");
-        _mint(msg.sender, 10*10**18);
+    function stake(uint amount) public {
+        staker storage staking = stakers[msg.sender];
+        staking.stakeAmount = amount;
+        staking.skater = msg.sender;
+        staking.stakeTime = block.timestamp;
+        boredToken.transferFrom(msg.sender,address(this),amount);
+        // IERC20(boredToken).approve(address(this),amount);
     }
 
-    function stake(uint amount) public payable{
-        _transfer(msg.sender,address(this),amount);
-        _approve(msg.sender,address(this),amount);
-        uint currentTime = block.timestamp;
-        uint investTime = block.timestamp + 3 days;
-        uint months = (block.timestamp + 30) % 30;
-        if(investTime > currentTime){
-            amount = (10 * amount * months) / 100;
-        }
+    function withdraw(uint withdrawAmount) public {
+       staker storage s =  stakers[msg.sender];
+       uint daysPassed = (block.timestamp - s.stakeTime)/ (60);
+       uint reward = s.stakeAmount * 10/ 100 * daysPassed;
+       if(s.stakeTime > 1 minutes){
+           s.reward += reward/30;
+       }
+       else{
+           s.reward = 0;
+       }
+       s.balance = s.reward + s.stakeAmount;
+       require(withdrawAmount <= s.balance, "you can only withdraw within your reward");
+       boredToken.transfer(msg.sender, withdrawAmount);
+       s.balance -=withdrawAmount;
+        // stake(s.balance);
     }
 
-    function withdraw() public{
-        
+    function autoCompound(uint coumpound) public{
+        staker storage s =  stakers[msg.sender];
+        require(s.balance != 0, "Please stake first");
+        uint autoCompoundAmount = s.balance += coumpound;
+        stake(autoCompoundAmount);
+    }
+
+    function viewStake() public view returns(staker memory){
+        return stakers[msg.sender];
     }
 }

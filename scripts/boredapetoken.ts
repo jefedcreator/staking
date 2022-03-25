@@ -14,18 +14,22 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-    // const BORED_APE = "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D";
-    // const BORED_OWNER = "0x1d565f170d45c192fb9f454a14110dcc88e0cc44";
+  // const stakeboredapetoken = "0x4bf010f1b9beDA5450a8dD702ED602A104ff65EE";
+  const deployedToken = "0x4bf010f1b9beDA5450a8dD702ED602A104ff65EE";
+  const deployedStake = "0x40a42Baf86Fc821f972Ad2aC878729063CeEF403";
+  const boredApeToken = await ethers.getContractAt("boredApeToken",deployedToken);
+  // const deployboredApeToken = await boredApeToken.deploy();
 
-  const boredToken = await ethers.getContractFactory("boredToken");
-  const deployBoredToken = await boredToken.deploy();
-//   const deployedBoredBal = await deployBoredBal.deployed();
-  
-  console.log("Bored Token deployed to:",deployBoredToken.address);
-  
+  // await deployboredApeToken.deployed;
+  //console.log("balance",await deployboredApeToken.balanceOf(deployboredApeToken.address))
+  // console.log("allowance",await deployboredApeToken.allowance(deployboredApeToken.address, deployboredApeToken.address))
+  await boredApeToken.transferBoredApeToken(
+    deployedStake,
+    10000
+  );
 
-
-//   console.log("Bored Bal deployed to:", deployBoredBal.address);
+  console.log("boredApeToken deployed to:", boredApeToken.address);
+  console.log("boredApeToken balance of staker contract",await boredApeToken.balanceOf(deployedStake))
 }
 
 // We recommend this pattern to be able to use async/await everywhere
