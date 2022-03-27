@@ -7,11 +7,9 @@ import "./IERC20.sol";
 contract stakeboredToken{
 
     struct staker{
-        uint stakeAmount;
-        uint balance;
-        uint reward;
+        uint64 stakeAmount;
+        uint64 stakeTime;
         address skater;
-        uint stakeTime;
     }
 
     mapping(address => staker) stakers;
@@ -19,34 +17,35 @@ contract stakeboredToken{
     IERC721 boredApe = IERC721(0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D);
     IERC20 boredToken = IERC20(0x4bf010f1b9beDA5450a8dD702ED602A104ff65EE);
 
-    function receiveToken() public{
+    function receiveToken() internal returns (bool) {
         require(boredApe.balanceOf(msg.sender) > 0, "You need to own a bored ape");
-        boredToken.transfer(msg.sender, 100);
+        (bool status) = boredToken.transfer(msg.sender, 100);
+        return status;
     }
 
-    function stake(uint amount) public {
+    function stake(uint amount) public returns (bool){
+        receiveToken();
+        require(amount <= 100,"cannot stake more than 100 tokens");
         staker storage staking = stakers[msg.sender];
         staking.stakeAmount = amount;
         staking.skater = msg.sender;
         staking.stakeTime = block.timestamp;
-        boredToken.transferFrom(msg.sender,address(this),amount);
-        // IERC20(boredToken).approve(address(this),amount);
+        (bool status) = boredToken.transferFrom(msg.sender,address(this),amount);
+        return status;
     }
 
-    function withdraw(uint withdrawAmount) public {
-       staker storage s =  stakers[msg.sender];
-       uint daysPassed = (block.timestamp - s.stakeTime)/ (60);
-       uint reward = s.stakeAmount * 10/ 100 * daysPassed;
-       if(s.stakeTime > 1 minutes){
-           s.reward += reward/30;
-       }
-       else{
-           s.reward = 0;
-       }
-       s.balance = s.reward + s.stakeAmount;
-       require(withdrawAmount <= s.balance, "you can only withdraw within your reward");
-       boredToken.transfer(msg.sender, withdrawAmount);
-       s.balance -=withdrawAmount;
+    function withdraw(uint withdrawAmount) public returns(bool) {
+        staker storage s =  stakers[msg.sender];
+        uint64 daysPassed = (block.timestamp - s.stakeTime);
+        if(s.stakeTime > 253,800){
+            uint reward = s.stakeAmount * 385 * timePassed;
+            s.stakeAmount += reward/10**10;
+        }
+        require(withdrawAmount <= s.balance, "you can only withdraw within your reward");
+        s.balance -=withdrawAmount;
+        s.stakeTime =uint64(block.timestamp);
+        (bool status) = boredToken.transfer(msg.sender, withdrawAmount);
+        return status;
         // stake(s.balance);
     }
 
