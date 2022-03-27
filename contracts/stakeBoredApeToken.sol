@@ -24,35 +24,35 @@ contract stakeboredToken{
     }
 
     function stake(uint amount) public returns (bool){
-        receiveToken();
+        require(receiveToken(), "you need bored Tokens to stake");
         require(amount <= 100,"cannot stake more than 100 tokens");
         staker storage staking = stakers[msg.sender];
-        staking.stakeAmount = amount;
+        staking.stakeAmount = uint64(amount);
         staking.skater = msg.sender;
-        staking.stakeTime = block.timestamp;
+        staking.stakeTime = uint64(block.timestamp);
         (bool status) = boredToken.transferFrom(msg.sender,address(this),amount);
         return status;
     }
 
-    function withdraw(uint withdrawAmount) public returns(bool) {
+    function withdraw(uint64 withdrawAmount) public returns(bool) {
         staker storage s =  stakers[msg.sender];
-        uint64 daysPassed = (block.timestamp - s.stakeTime);
-        if(s.stakeTime > 253,800){
+        uint64 timePassed = (uint64(block.timestamp) - s.stakeTime);
+        if(s.stakeTime > 253800){
             uint reward = s.stakeAmount * 385 * timePassed;
-            s.stakeAmount += reward/10**10;
+            s.stakeAmount += uint64(reward/10**10);
         }
-        require(withdrawAmount <= s.balance, "you can only withdraw within your reward");
-        s.balance -=withdrawAmount;
+        require(withdrawAmount <= s.stakeAmount, "you can only withdraw within your reward");
+        s.stakeAmount -=withdrawAmount;
         s.stakeTime =uint64(block.timestamp);
         (bool status) = boredToken.transfer(msg.sender, withdrawAmount);
         return status;
         // stake(s.balance);
     }
 
-    function autoCompound(uint coumpound) public{
+    function autoCompound(uint64 coumpound) public{
         staker storage s =  stakers[msg.sender];
-        require(s.balance != 0, "Please stake first");
-        uint autoCompoundAmount = s.balance += coumpound;
+        require(s.stakeAmount != 0, "Please stake first");
+        uint autoCompoundAmount = s.stakeAmount += coumpound;
         stake(autoCompoundAmount);
     }
 

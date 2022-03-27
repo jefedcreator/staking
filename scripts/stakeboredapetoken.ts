@@ -36,7 +36,7 @@ async function main() {
 
   console.log("deploystakeboredapetoken deployed to:", stakeboredapetokenInteract.address);
   
-  stakeboredapetokenInteract.connect(signer).receiveToken();
+  //stakeboredapetokenInteract.connect(signer).receiveToken();
 
   console.log("bored ape token balance of BAYC hodler",await boredapetokenInteract.balanceOf(boredApeHolder));
 
