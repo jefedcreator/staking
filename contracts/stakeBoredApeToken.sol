@@ -7,9 +7,9 @@ import "./IERC20.sol";
 contract stakeboredToken{
 
     struct staker{
-        uint64 stakeAmount;
-        uint64 stakeTime;
         address skater;
+        uint48 stakeTime;
+        uint48 stakeAmount;
     }
 
     mapping(address => staker) stakers;
